@@ -31,3 +31,16 @@ export interface SignupResponse {
   message: string;
   user?: any;
 }
+
+// 로그인 데이터 인터페이스
+export interface LoginData {
+  email: string;
+  password: string;
+}
+
+// 로그인 응답 인터페이스
+export interface LoginResponse {
+  success: boolean;
+  message: string;
+  user?: any;
+}

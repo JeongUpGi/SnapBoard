@@ -7,19 +7,60 @@ import {
   StyleSheet,
   SafeAreaView,
   TouchableOpacity,
+  Alert,
+  ActivityIndicator,
 } from "react-native";
 import { colors } from "../../assets/colors/color";
 import { NavigationProp, useNavigation } from "@react-navigation/native";
 import { AuthStackParamList } from "../../model/model";
+import { loginUser } from "../../network/network";
 
 const LoginScreen = () => {
   const navigation = useNavigation<NavigationProp<AuthStackParamList>>();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  // 로그인 처리
+  const handleLogin = async () => {
+    if (!email.trim()) {
+      Alert.alert("오류", "이메일을 입력해주세요.");
+      return;
+    }
+
+    if (!password.trim()) {
+      Alert.alert("오류", "비밀번호를 입력해주세요.");
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const result = await loginUser({
+        email,
+        password,
+      });
+
+      if (result.success) {
+        console.log("로그인 성공");
+      } else {
+        Alert.alert("로그인 실패", result.message);
+      }
+    } catch (error) {
+      Alert.alert("로그인 실패", "로그인 중 오류가 발생했습니다.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
+      {isLoading && (
+        <View style={styles.loadingOverlay}>
+          <ActivityIndicator size="large" color={colors.blue} />
+        </View>
+      )}
       <View style={styles.topContainer}>
         <Image
           source={require("../../assets/images/app_logo.png")}
@@ -47,7 +88,11 @@ const LoginScreen = () => {
         />
 
         {/* 로그인 */}
-        <TouchableOpacity style={styles.loginButton} onPress={() => {}}>
+        <TouchableOpacity
+          style={[styles.loginButton, isLoading && styles.loginButtonDisabled]}
+          onPress={handleLogin}
+          disabled={isLoading}
+        >
           <Text style={styles.loginButtonText}>로그인</Text>
         </TouchableOpacity>
 
@@ -116,6 +161,17 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  loadingOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 1000,
+  },
   topContainer: {
     flex: 1,
     alignItems: "center",
@@ -149,6 +205,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     width: "100%",
     marginTop: 20,
+  },
+  loginButtonDisabled: {
+    backgroundColor: colors.gray_c0c0c0,
   },
   loginButtonText: {
     color: colors.white,
