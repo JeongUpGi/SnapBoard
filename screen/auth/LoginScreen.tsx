@@ -9,6 +9,8 @@ import {
   TouchableOpacity,
   Alert,
   ActivityIndicator,
+  Keyboard,
+  TouchableWithoutFeedback,
 } from "react-native";
 import { colors } from "../../assets/colors/color";
 import { NavigationProp, useNavigation } from "@react-navigation/native";
@@ -61,96 +63,103 @@ const LoginScreen = () => {
           <ActivityIndicator size="large" color={colors.blue} />
         </View>
       )}
-      <View style={styles.topContainer}>
-        <Image
-          source={require("../../assets/images/app_logo.png")}
-          style={styles.appLogo}
-        />
-        <Text style={styles.description}>
-          친구들의 사진과 게시물을 보려면 로그인하세요
-        </Text>
-      </View>
-      <View style={styles.bottomContainer}>
-        <TextInput
-          style={styles.input}
-          placeholder="이메일"
-          value={email}
-          onChangeText={setEmail}
-          autoCapitalize="none"
-          keyboardType="email-address"
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="비밀번호"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-        />
-
-        {/* 로그인 */}
-        <TouchableOpacity
-          style={[styles.loginButton, isLoading && styles.loginButtonDisabled]}
-          onPress={handleLogin}
-          disabled={isLoading}
-        >
-          <Text style={styles.loginButtonText}>로그인</Text>
-        </TouchableOpacity>
-
-        {/* 회원가입  */}
-        <View style={styles.signUpTextContainer}>
-          <Text style={styles.signUpText}>
-            계정이 없으신가요?{" "}
-            <Text
-              style={styles.signUpLink}
-              onPress={() => navigation.navigate("SignUp")}
-            >
-              회원가입하기
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+        <View style={{ flex: 1 }}>
+          <View style={styles.topContainer}>
+            <Image
+              source={require("../../assets/images/app_logo.png")}
+              style={styles.appLogo}
+            />
+            <Text style={styles.description}>
+              친구들의 사진과 게시물을 보려면 로그인하세요
             </Text>
-          </Text>
-        </View>
+          </View>
+          <View style={styles.bottomContainer}>
+            <TextInput
+              style={styles.input}
+              placeholder="이메일"
+              value={email}
+              onChangeText={setEmail}
+              autoCapitalize="none"
+              keyboardType="email-address"
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="비밀번호"
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry
+            />
 
-        <View style={styles.dividerWrapper}>
-          <View style={styles.dividerLine} />
-          <Text style={styles.dividerText}>또는</Text>
-          <View style={styles.dividerLine} />
-        </View>
+            {/* 로그인 */}
+            <TouchableOpacity
+              style={[
+                styles.loginButton,
+                isLoading && styles.loginButtonDisabled,
+              ]}
+              onPress={handleLogin}
+              disabled={isLoading}
+            >
+              <Text style={styles.loginButtonText}>로그인</Text>
+            </TouchableOpacity>
 
-        {/* 소셜 로그인 버튼 섹션 */}
-        <View style={styles.socialContainer}>
-          {/* Google 로그인 */}
-          <TouchableOpacity style={styles.googleButton} onPress={() => {}}>
-            <View style={{ flexDirection: "row", alignItems: "center" }}>
-              <Image
-                source={require("../../assets/images/google_logo.png")}
-                style={styles.socialIcon}
-              />
-              <Text style={styles.socialText}>구글로 계속하기</Text>
+            {/* 회원가입  */}
+            <View style={styles.signUpTextContainer}>
+              <Text style={styles.signUpText}>
+                계정이 없으신가요?{" "}
+                <Text
+                  style={styles.signUpLink}
+                  onPress={() => navigation.navigate("SignUp")}
+                >
+                  회원가입하기
+                </Text>
+              </Text>
             </View>
-          </TouchableOpacity>
 
-          {/* Kakao 로그인 */}
-          <TouchableOpacity style={styles.kakaoButton} onPress={() => {}}>
-            <View style={{ flexDirection: "row", alignItems: "center" }}>
-              <Image
-                source={require("../../assets/images/kakao_logo.png")}
-                style={styles.socialIcon}
-              />
-              <Text style={styles.socialText}>카카오로 계속하기</Text>
+            <View style={styles.dividerWrapper}>
+              <View style={styles.dividerLine} />
+              <Text style={styles.dividerText}>또는</Text>
+              <View style={styles.dividerLine} />
             </View>
-          </TouchableOpacity>
 
-          {/* Naver 로그인 */}
-          <TouchableOpacity style={styles.naverButton} onPress={() => {}}>
-            <View style={{ flexDirection: "row", alignItems: "center" }}>
-              <Image
-                source={require("../../assets/images/naver_logo.png")}
-                style={styles.socialIcon}
-              />
-              <Text style={styles.socialText}>네이버로 계속하기</Text>
+            {/* 소셜 로그인 버튼 섹션 */}
+            <View style={styles.socialContainer}>
+              {/* Google 로그인 */}
+              <TouchableOpacity style={styles.googleButton} onPress={() => {}}>
+                <View style={{ flexDirection: "row", alignItems: "center" }}>
+                  <Image
+                    source={require("../../assets/images/google_logo.png")}
+                    style={styles.socialIcon}
+                  />
+                  <Text style={styles.socialText}>구글로 계속하기</Text>
+                </View>
+              </TouchableOpacity>
+
+              {/* Kakao 로그인 */}
+              <TouchableOpacity style={styles.kakaoButton} onPress={() => {}}>
+                <View style={{ flexDirection: "row", alignItems: "center" }}>
+                  <Image
+                    source={require("../../assets/images/kakao_logo.png")}
+                    style={styles.socialIcon}
+                  />
+                  <Text style={styles.socialText}>카카오로 계속하기</Text>
+                </View>
+              </TouchableOpacity>
+
+              {/* Naver 로그인 */}
+              <TouchableOpacity style={styles.naverButton} onPress={() => {}}>
+                <View style={{ flexDirection: "row", alignItems: "center" }}>
+                  <Image
+                    source={require("../../assets/images/naver_logo.png")}
+                    style={styles.socialIcon}
+                  />
+                  <Text style={styles.socialText}>네이버로 계속하기</Text>
+                </View>
+              </TouchableOpacity>
             </View>
-          </TouchableOpacity>
+          </View>
         </View>
-      </View>
+      </TouchableWithoutFeedback>
     </SafeAreaView>
   );
 };
