@@ -13,6 +13,8 @@ type ColorPaletteType = {
   green_1DB954: string;
   green_ffffff1a: string;
   gray_333333: string;
+  kakako: string;
+  naver: string;
 };
 
 export const colors: ColorPaletteType = {
@@ -30,4 +32,6 @@ export const colors: ColorPaletteType = {
   green_1DB954: "#1DB954",
   green_ffffff1a: "#ffffff1a",
   gray_333333: "#333333",
+  kakako: "#fee500",
+  naver: "#03c75a",
 };
