@@ -1,4 +1,6 @@
 import { auth } from "../firebaseConfig";
+import { db } from "../firebaseConfig";
+import { doc, setDoc } from "firebase/firestore";
 import {
   createUserWithEmailAndPassword,
   sendEmailVerification,
@@ -24,6 +26,13 @@ export const signupUser = async (data: SignupData): Promise<SignupResponse> => {
     const user = userCredential.user;
 
     await sendEmailVerification(user);
+
+    // Firestore Database에 저장
+    await setDoc(doc(db, "users", user.uid), {
+      email: user.email,
+      nickname: data.nickname,
+      createdAt: new Date(),
+    });
 
     return {
       success: true,

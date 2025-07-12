@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "../../firebaseConfig"; // 경로 확인
 import {
   View,
   TextInput,
@@ -45,7 +47,9 @@ const LoginScreen = () => {
       });
 
       if (result.success) {
-        console.log("로그인 성공");
+        // const userDoc = await getDoc(doc(db, "users", result.user.uid));
+        // const userNickName = userDoc.data().nickname;
+        // console.log("userNickName:", userNickName);
       } else {
         Alert.alert("로그인 실패", result.message);
       }
