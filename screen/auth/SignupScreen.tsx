@@ -4,7 +4,14 @@ import { SafeAreaView, Text, StyleSheet } from "react-native";
 const SignupScreen = () => {
   return (
     <SafeAreaView style={styles.container}>
-      <Text>It is SignupScreen</Text>
+      <Header.default
+        title="회원가입"
+        leftIcon={require("../../assets/images/previous_arrow.png")}
+        onPressLeft={() => {
+          navigation.goBack();
+        }}
+        leftIconStyle={{ width: 20, height: 20 }}
+      />
     </SafeAreaView>
   );
 };
