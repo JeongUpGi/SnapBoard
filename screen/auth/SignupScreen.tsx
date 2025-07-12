@@ -10,12 +10,14 @@ import {
   Alert,
   KeyboardAvoidingView,
   ScrollView,
+  ActivityIndicator,
 } from "react-native";
 import { colors } from "../../assets/colors/color";
 import { NavigationProp, useNavigation } from "@react-navigation/native";
 import { AuthStackParamList } from "../../model/model";
 import { Header } from "../../component/common/Header";
 import { validateEmail, validatePassword } from "../../utils/formatHelper";
+import { signupUser } from "../../network/network";
 
 const SignupScreen = () => {
   const navigation = useNavigation<NavigationProp<AuthStackParamList>>();
@@ -24,15 +26,15 @@ const SignupScreen = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-  // refs for input focus
   const emailRef = useRef<TextInput>(null);
   const passwordRef = useRef<TextInput>(null);
   const confirmPasswordRef = useRef<TextInput>(null);
   const nicknameRef = useRef<TextInput>(null);
 
   // 회원가입 처리
-  const handleSignup = () => {
+  const handleSignup = async () => {
     if (!email.trim() || !validateEmail(email)) {
       Alert.alert("오류", "올바른 이메일 형식을 입력해주세요.");
       return;
@@ -53,21 +55,44 @@ const SignupScreen = () => {
       return;
     }
 
-    Alert.alert("성공", "가입하신 이메일로 인증 후 로그인을 시도해주세요", [
-      {
-        text: "확인",
-        onPress: () => {
-          navigation.reset({
-            index: 0,
-            routes: [{ name: "Login" }],
-          });
-        },
-      },
-    ]);
+    setIsLoading(true);
+
+    try {
+      const result = await signupUser({
+        email,
+        password,
+        nickname,
+      });
+
+      if (result.success) {
+        Alert.alert("회원가입 완료", result.message, [
+          {
+            text: "확인",
+            onPress: () => {
+              navigation.reset({
+                index: 0,
+                routes: [{ name: "Login" }],
+              });
+            },
+          },
+        ]);
+      } else {
+        Alert.alert("오류", result.message);
+      }
+    } catch (error) {
+      Alert.alert("오류", "회원가입 중 오류가 발생했습니다.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
     <SafeAreaView style={styles.container}>
+      {isLoading && (
+        <View style={styles.loadingOverlay}>
+          <ActivityIndicator size="large" color={colors.blue} />
+        </View>
+      )}
       <Header.default
         title="회원가입"
         leftIcon={require("../../assets/images/previous_arrow.png")}
@@ -147,8 +172,12 @@ const SignupScreen = () => {
               onSubmitEditing={handleSignup}
             />
             <TouchableOpacity
-              style={styles.signupButton}
+              style={[
+                styles.signupButton,
+                isLoading && styles.signupButtonDisabled,
+              ]}
               onPress={handleSignup}
+              disabled={isLoading}
             >
               <Text style={styles.signupButtonText}>회원가입</Text>
             </TouchableOpacity>
@@ -181,6 +210,17 @@ export default SignupScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  loadingOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0, 0, 0, 0.4)",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 1000,
   },
   keyboardAvoidingContainer: {
     flex: 1,
@@ -225,6 +265,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 10,
     marginBottom: 20,
+  },
+  signupButtonDisabled: {
+    backgroundColor: colors.gray_c0c0c0,
   },
   signupButtonText: {
     color: colors.white,

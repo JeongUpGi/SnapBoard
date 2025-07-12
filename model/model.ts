@@ -17,3 +17,17 @@ export interface HeaderProps {
   leftIconStyle?: ImageStyle;
   rightIconStyle?: ImageStyle;
 }
+
+// 회원가입 데이터 인터페이스
+export interface SignupData {
+  email: string;
+  password: string;
+  nickname: string;
+}
+
+// 회원가입 응답 인터페이스
+export interface SignupResponse {
+  success: boolean;
+  message: string;
+  user?: any;
+}
