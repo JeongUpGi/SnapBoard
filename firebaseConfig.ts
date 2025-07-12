@@ -1,17 +1,19 @@
 import { initializeApp } from "firebase/app";
 import { initializeFirestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
+import Constants from "expo-constants";
+
+const extra = (Constants.expoConfig as any).extra;
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAB2334MjJAY1ZK_qOoZnUXR7IUbsdE3ao",
-  authDomain: "snapboard-eafce.firebaseapp.com",
-  projectId: "snapboard-eafce",
-  storageBucket: "snapboard-eafce.firebasestorage.app",
-  messagingSenderId: "208272221014",
-  appId: "1:208272221014:web:eab5c3eadb3eb36f1f6cf7",
-  measurementId: "G-8WQD7X45D3",
+  apiKey: extra.FIREBASE_API_KEY,
+  authDomain: extra.FIREBASE_AUTH_DOMAIN,
+  projectId: extra.FIREBASE_PROJECT_ID,
+  storageBucket: extra.FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: extra.FIREBASE_MESSAGING_SENDER_ID,
+  appId: extra.FIREBASE_APP_ID,
+  measurementId: extra.FIREBASE_MEASUREMENT_ID,
 };
-
 const app = initializeApp(firebaseConfig);
 
 export const auth = getAuth(app);
