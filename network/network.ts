@@ -2,6 +2,7 @@ import { auth } from "../firebaseConfig";
 import { db } from "../firebaseConfig";
 import { doc, setDoc } from "firebase/firestore";
 import {
+  doc,
   collection,
   addDoc,
   serverTimestamp,
@@ -149,11 +150,30 @@ export async function createPost({
 // 콜백 처리
 export function getPosts(callback: (posts: Post[]) => void) {
   const q = query(collection(db, "posts"), orderBy("createdAt", "desc"));
-  return onSnapshot(q, (snapshot) => {
+  return onSnapshot(q, async (snapshot) => {
     const posts = snapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
     })) as Post[];
-    callback(posts);
+
+    // 현재 사용자의 좋아요 상태 확인 (post/postId/likes 에서 유저 id가 있는지 확인)
+    if (auth.currentUser) {
+      const postsWithLikeStatus = await Promise.all(
+        posts.map(async (post) => {
+          try {
+            const likeDoc = await getDoc(
+              doc(db, "posts", post.id, "likes", auth.currentUser!.uid)
+            );
+            return { ...post, isLiked: likeDoc.exists() };
+          } catch (error) {
+            console.error("좋아요 상태 확인 오류:", error);
+            return { ...post, isLiked: false };
+          }
+        })
+      );
+      callback(postsWithLikeStatus);
+    } else {
+      callback(posts);
+    }
   });
 }
