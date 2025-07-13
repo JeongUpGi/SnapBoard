@@ -8,7 +8,7 @@ import LoginScreen from "../screen/auth/LoginScreen";
 import SignUpScreen from "../screen/auth/SignupScreen";
 import HomeScreen from "../screen/home/HomeScreen";
 import ProfileScreen from "../screen/profile/ProfileScreen";
-import PostScreen from "../screen/post/\bPostScreen";
+import PostScreen from "../screen/post/PostScreen";
 
 const Stack = createNativeStackNavigator<AuthStackParamList>();
 const Tab = createBottomTabNavigator();
