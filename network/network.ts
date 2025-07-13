@@ -10,6 +10,7 @@ import {
   createUserWithEmailAndPassword,
   sendEmailVerification,
   signInWithEmailAndPassword,
+  updateProfile,
 } from "firebase/auth";
 
 import {
@@ -29,6 +30,10 @@ export const signupUser = async (data: SignupData): Promise<SignupResponse> => {
     );
 
     const user = userCredential.user;
+
+    await updateProfile(user, {
+      displayName: data.nickname,
+    });
 
     await sendEmailVerification(user);
 
