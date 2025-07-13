@@ -2,6 +2,11 @@ import { auth } from "../firebaseConfig";
 import { db } from "../firebaseConfig";
 import { doc, setDoc } from "firebase/firestore";
 import {
+  collection,
+  addDoc,
+  serverTimestamp,
+} from "firebase/firestore";
+import {
   createUserWithEmailAndPassword,
   sendEmailVerification,
   signInWithEmailAndPassword,
@@ -107,3 +112,27 @@ export const loginUser = async (data: LoginData): Promise<LoginResponse> => {
     };
   }
 };
+
+export async function createPost({
+  title,
+  content,
+  imageUrl,
+}: {
+  title: string;
+  content: string;
+  imageUrl?: string;
+}) {
+  if (!auth.currentUser) return;
+
+  const user = auth.currentUser;
+
+  await addDoc(collection(db, "posts"), {
+    authorId: user.uid,
+    authorName: user.displayName,
+    title,
+    content,
+    imageUrl: imageUrl || null,
+    createdAt: serverTimestamp(),
+    likeCount: 0,
+  });
+}

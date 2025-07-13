@@ -10,20 +10,55 @@ import {
   ScrollView,
   TouchableWithoutFeedback,
   Keyboard,
+  Alert,
+  ActivityIndicator,
 } from "react-native";
+import { NavigationProp, useNavigation } from "@react-navigation/native";
+
+import { createPost } from "../../network/network";
+import { StackParamList } from "../../model/model";
+
 import { colors } from "../../assets/colors/color";
 
 const PostScreen = () => {
+  const navigation = useNavigation<NavigationProp<StackParamList>>();
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
-  const handleSubmit = async () => {};
+  const handleSubmit = async () => {
+    setIsLoading(true);
+
+    try {
+      await createPost({ title, content }); // 추후 image도 추가해야함
+      Alert.alert("게시글 등록 완료", "게시글이 성공적으로 등록되었습니다.", [
+        {
+          text: "확인",
+          onPress: () => {
+            setTitle("");
+            setContent("");
+            setSelectedImage(null);
+            navigation.navigate("HomeStack");
+          },
+        },
+      ]);
+    } catch (error: any) {
+      Alert.alert("등록 실패", error.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleAddImage = () => {};
 
   return (
     <SafeAreaView style={styles.container}>
+      {isLoading && (
+        <View style={styles.loadingOverlay}>
+          <ActivityIndicator size="large" color={colors.blue} />
+        </View>
+      )}
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <KeyboardAvoidingView
           style={styles.keyboardAvoidingView}
@@ -111,6 +146,17 @@ const styles = StyleSheet.create({
   scrollContainer: {
     flexGrow: 1,
     padding: 20,
+  },
+  loadingOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 1000,
   },
   inputContainer: {
     marginBottom: 24,
