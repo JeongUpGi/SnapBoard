@@ -13,6 +13,7 @@ import { getPosts } from "../../network/network";
 import { Post } from "../../model/model";
 
 import { colors } from "../../assets/colors/color";
+import { formatDate } from "../../utils/formatHelper";
 import { Header } from "../../component/common/Header";
 
 const HomeScreen = () => {
@@ -39,6 +40,7 @@ const HomeScreen = () => {
           </View>
           <View style={styles.authorDetails}>
             <Text style={styles.authorName}>{item.authorName || "익명"}</Text>
+            <Text style={styles.postTime}>{formatDate(item.createdAt)}</Text>
           </View>
         </View>
       </View>
@@ -181,6 +183,10 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: colors.black,
     marginBottom: 2,
+  },
+  postTime: {
+    fontSize: 12,
+    color: colors.gray_808080,
   },
   postImage: {
     width: "100%",

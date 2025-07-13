@@ -16,3 +16,20 @@ export const validatePassword = (password: string) => {
     hasUpperCase && hasLowerCase && hasNumbers && hasSpecialChar && isLongEnough
   );
 };
+
+// 게시글 작성 시간에 따른 format함수
+export const formatDate = (timestamp: any) => {
+  if (!timestamp?.toDate) return "";
+  const date = timestamp.toDate();
+  const now = new Date();
+  const diffInMinutes = Math.floor(
+    (now.getTime() - date.getTime()) / (1000 * 60)
+  );
+  const diffInHours = Math.floor(diffInMinutes / 60);
+
+  if (diffInMinutes < 2) return "방금 전"; //2분 전
+  if (diffInMinutes < 60) return `${diffInMinutes}분 전`;
+  if (diffInHours < 24) return `${diffInHours}시간 전`;
+  if (diffInHours < 168) return `${Math.floor(diffInHours / 24)}일 전`;
+  return date.toLocaleDateString();
+};
