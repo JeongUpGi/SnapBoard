@@ -28,8 +28,33 @@ const DefaultHeader: React.FC<HeaderProps> = ({
   );
 };
 
+// 왼쪽 제목 헤더
+const LeftTitleHeader: React.FC<HeaderProps> = ({
+  title,
+  leftIcon,
+  rightIcon,
+  headerBackgroundColor,
+  onPressRight,
+  titleStyle,
+  leftIconStyle,
+  rightIconStyle,
+}) => {
+  return (
+    <View style={[styles.headerContainer, headerBackgroundColor]}>
+      <View style={styles.rowWrapper}>
+        <Image source={leftIcon} style={leftIconStyle} />
+        <Text style={[styles.title, titleStyle]}>{title}</Text>
+      </View>
+      <TouchableOpacity style={styles.buttonWrapper} onPress={onPressRight}>
+        <Image source={rightIcon} style={rightIconStyle} />
+      </TouchableOpacity>
+    </View>
+  );
+};
+
 export const Header = {
   default: DefaultHeader,
+  leftTitle: LeftTitleHeader,
 };
 
 const styles = StyleSheet.create({
@@ -40,6 +65,10 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     paddingHorizontal: 10,
+  },
+  rowWrapper: {
+    flexDirection: "row",
+    alignItems: "center",
   },
   buttonWrapper: {
     width: 40,
