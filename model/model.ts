@@ -6,7 +6,6 @@ export type StackParamList = {
   Home: undefined;
   Profile: undefined;
   Post: undefined;
-
   // 탭 네비게이션 타입 추가
   HomeStack: undefined;
   PostStack: undefined;
@@ -51,4 +50,16 @@ export interface LoginResponse {
   success: boolean;
   message: string;
   user?: any;
+}
+
+// 게시글 데이터 인터페이스
+export interface Post {
+  id: string;
+  title: string;
+  content: string;
+  imageUrl?: string;
+  authorId: string;
+  authorName: string;
+  createdAt: Date;
+  likeCount: number;
 }

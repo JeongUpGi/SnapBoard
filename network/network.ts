@@ -5,6 +5,9 @@ import {
   collection,
   addDoc,
   serverTimestamp,
+  onSnapshot,
+  orderBy,
+  query,
 } from "firebase/firestore";
 import {
   createUserWithEmailAndPassword,
@@ -18,6 +21,7 @@ import {
   LoginResponse,
   SignupData,
   SignupResponse,
+  Post,
 } from "../model/model";
 
 // Firebase 회원가입
@@ -139,5 +143,17 @@ export async function createPost({
     imageUrl: imageUrl || null,
     createdAt: serverTimestamp(),
     likeCount: 0,
+  });
+}
+
+// 콜백 처리
+export function getPosts(callback: (posts: Post[]) => void) {
+  const q = query(collection(db, "posts"), orderBy("createdAt", "desc"));
+  return onSnapshot(q, (snapshot) => {
+    const posts = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    })) as Post[];
+    callback(posts);
   });
 }
