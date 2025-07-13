@@ -68,7 +68,12 @@ function ProfileStack() {
 
 export function MainBottomTabNavigator() {
   return (
-    <Tab.Navigator screenOptions={{ tabBarShowLabel: false }}>
+    <Tab.Navigator
+      screenOptions={{
+        tabBarShowLabel: false,
+        headerShown: false,
+      }}
+    >
       <Tab.Screen
         name="HomeStack"
         component={HomeStack}
