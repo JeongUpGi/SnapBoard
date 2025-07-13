@@ -2,7 +2,7 @@ import React from "react";
 import { Image } from "react-native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { AuthStackParamList } from "../model/model";
+import { StackParamList } from "../model/model";
 
 import LoginScreen from "../screen/auth/LoginScreen";
 import SignUpScreen from "../screen/auth/SignupScreen";
@@ -10,7 +10,7 @@ import HomeScreen from "../screen/home/HomeScreen";
 import ProfileScreen from "../screen/profile/ProfileScreen";
 import PostScreen from "../screen/post/PostScreen";
 
-const Stack = createNativeStackNavigator<AuthStackParamList>();
+const Stack = createNativeStackNavigator<StackParamList>();
 const Tab = createBottomTabNavigator();
 
 export function AuthNavigator() {

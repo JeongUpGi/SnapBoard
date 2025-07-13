@@ -14,13 +14,13 @@ import {
 } from "react-native";
 import { colors } from "../../assets/colors/color";
 import { NavigationProp, useNavigation } from "@react-navigation/native";
-import { AuthStackParamList } from "../../model/model";
+import { StackParamList } from "../../model/model";
 import { Header } from "../../component/common/Header";
 import { validateEmail, validatePassword } from "../../utils/formatHelper";
 import { signupUser } from "../../network/network";
 
 const SignupScreen = () => {
-  const navigation = useNavigation<NavigationProp<AuthStackParamList>>();
+  const navigation = useNavigation<NavigationProp<StackParamList>>();
 
   const [nickname, setNickname] = useState("");
   const [email, setEmail] = useState("");

@@ -1,6 +1,6 @@
 import { TextStyle, ImageStyle } from "react-native";
 
-export type AuthStackParamList = {
+export type StackParamList = {
   Login: undefined;
   SignUp: undefined;
   Home: undefined;
