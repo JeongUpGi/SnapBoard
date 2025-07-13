@@ -6,6 +6,11 @@ export type StackParamList = {
   Home: undefined;
   Profile: undefined;
   Post: undefined;
+
+  // 탭 네비게이션 타입 추가
+  HomeStack: undefined;
+  PostStack: undefined;
+  ProfileStack: undefined;
 };
 
 export interface HeaderProps {
