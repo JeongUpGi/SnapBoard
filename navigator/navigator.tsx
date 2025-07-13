@@ -8,6 +8,7 @@ import LoginScreen from "../screen/auth/LoginScreen";
 import SignUpScreen from "../screen/auth/SignupScreen";
 import HomeScreen from "../screen/home/HomeScreen";
 import ProfileScreen from "../screen/profile/ProfileScreen";
+import PostScreen from "../screen/post/\bPostScreen";
 
 const Stack = createNativeStackNavigator<AuthStackParamList>();
 const Tab = createBottomTabNavigator();
@@ -43,6 +44,17 @@ function HomeStack() {
   );
 }
 
+function PostStack() {
+  return (
+    <Stack.Navigator
+      initialRouteName="Post"
+      screenOptions={{ headerShown: false }}
+    >
+      <Stack.Screen name="Post" component={PostScreen} />
+    </Stack.Navigator>
+  );
+}
+
 function ProfileStack() {
   return (
     <Stack.Navigator
@@ -64,7 +76,19 @@ export function MainBottomTabNavigator() {
           tabBarIcon: ({ color, size }) => (
             <Image
               source={require("../assets/images/home.png")}
-              style={{ width: size, height: size, tintColor: color }}
+              style={{ width: 30, height: 30, tintColor: color }}
+            />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="PostStack"
+        component={PostStack}
+        options={{
+          tabBarIcon: ({ color, size }) => (
+            <Image
+              source={require("../assets/images/plus.png")}
+              style={{ width: 25, height: 25, tintColor: color }}
             />
           ),
         }}
@@ -76,7 +100,7 @@ export function MainBottomTabNavigator() {
           tabBarIcon: ({ color, size }) => (
             <Image
               source={require("../assets/images/profile.png")}
-              style={{ width: size, height: size, tintColor: color }}
+              style={{ width: 30, height: 30, tintColor: color }}
             />
           ),
         }}

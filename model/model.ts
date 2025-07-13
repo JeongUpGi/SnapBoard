@@ -5,6 +5,7 @@ export type AuthStackParamList = {
   SignUp: undefined;
   Home: undefined;
   Profile: undefined;
+  Post: undefined;
 };
 
 export interface HeaderProps {
