@@ -10,8 +10,13 @@ import {
   Image,
   Alert,
 } from "react-native";
-import { getPosts, addLike, removeLike } from "../../network/network";
-import { Post } from "../../model/model";
+import {
+  getPosts,
+  addLike,
+  removeLike,
+  getComments,
+} from "../../network/network";
+import { Post, PostComment } from "../../model/model";
 import { auth } from "../../firebaseConfig";
 
 import { colors } from "../../assets/colors/color";
@@ -22,6 +27,9 @@ const HomeScreen = () => {
   const [posts, setPosts] = useState<Post[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const processingLikesRef = React.useRef<Set<string>>(new Set()); //중복처리 방지를 위한 Ref
+  const [comments, setComments] = useState<{ [postId: string]: PostComment[] }>(
+    {}
+  );
 
   useEffect(() => {
     const unsubscribe = getPosts((data) => {
@@ -31,6 +39,20 @@ const HomeScreen = () => {
 
     return unsubscribe;
   }, []);
+
+  // 댓글 실시간 get
+  useEffect(() => {
+    const unsubscribes: (() => void)[] = [];
+    posts.forEach((post) => {
+      const postComments = getComments(post.id, (commentList) => {
+        setComments((prev) => ({ ...prev, [post.id]: commentList }));
+      });
+      unsubscribes.push(postComments);
+    });
+    return () => {
+      unsubscribes.forEach((unsub) => unsub());
+    };
+  }, [posts]);
 
   // 좋아요 버튼 클릭 핸들러
   const handleLikePress = async (postId: string) => {
@@ -134,6 +156,18 @@ const HomeScreen = () => {
           />
           <Text style={styles.actionText}>댓글</Text>
         </TouchableOpacity>
+      </View>
+
+      {/* 댓글 목록 */}
+      <View style={styles.commentList}>
+        {comments[item.id].map((item) => (
+          <View key={item.id} style={styles.commentItem}>
+            <View style={styles.commentContent}>
+              <Text style={styles.commentUserName}>{item.userName}</Text>
+              <Text style={styles.commentText}>{item.content}</Text>
+            </View>
+          </View>
+        ))}
       </View>
     </View>
   );
@@ -306,5 +340,27 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: colors.gray_808080,
     textAlign: "center",
+  },
+  commentList: {
+    marginTop: 15,
+  },
+  commentItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 6,
+  },
+  commentContent: {
+    flex: 1,
+    flexDirection: "row",
+  },
+  commentUserName: {
+    fontWeight: "bold",
+    fontSize: 13,
+    color: colors.black,
+    marginRight: 7,
+  },
+  commentText: {
+    fontSize: 13,
+    color: colors.gray_333333,
   },
 });

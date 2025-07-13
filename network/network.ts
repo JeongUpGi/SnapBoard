@@ -27,6 +27,7 @@ import {
   SignupData,
   SignupResponse,
   Post,
+  PostComment,
 } from "../model/model";
 
 // Firebase 회원가입
@@ -151,7 +152,7 @@ export async function createPost({
   });
 }
 
-// 콜백 처리
+// 게시글 get
 export function getPosts(callback: (posts: Post[]) => void) {
   const q = query(collection(db, "posts"), orderBy("createdAt", "desc"));
   return onSnapshot(q, async (snapshot) => {
@@ -214,4 +215,28 @@ export async function removeLike(postId: string, userId: string) {
   } catch (error) {
     console.error("좋아요 제거 오류:", error);
   }
+}
+// 댓글 get
+export function getComments(
+  postId: string,
+  callback: (comments: PostComment[]) => void
+) {
+  const q = query(
+    collection(db, "posts", postId, "comments"),
+    orderBy("createdAt", "asc")
+  );
+  return onSnapshot(q, (snapshot) => {
+    const comments: PostComment[] = snapshot.docs.map((doc) => {
+      const res = doc.data();
+      return {
+        id: doc.id,
+        userId: res.userId,
+        userName: res.userName,
+        userProfile: res.userProfile,
+        content: res.content,
+        createdAt: res.createdAt?.toDate ? res.createdAt.toDate() : new Date(),
+      };
+    });
+    callback(comments);
+  });
 }

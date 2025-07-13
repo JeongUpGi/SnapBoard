@@ -64,3 +64,13 @@ export interface Post {
   likeCount: number;
   isLiked: boolean; // 현재 사용자가 좋아요를 눌렀는지 여부
 }
+
+// 게시글 댓글 인터페이스
+export interface PostComment {
+  id: string;
+  userId: string;
+  userName: string;
+  userProfile?: string; // 선택적 프로필 이미지 URL
+  content: string;
+  createdAt: Date;
+}
