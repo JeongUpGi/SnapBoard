@@ -3,6 +3,8 @@ import { TextStyle, ImageStyle } from "react-native";
 export type AuthStackParamList = {
   Login: undefined;
   SignUp: undefined;
+  Home: undefined;
+  Profile: undefined;
 };
 
 export interface HeaderProps {

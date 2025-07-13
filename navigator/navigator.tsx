@@ -1,12 +1,18 @@
 import React from "react";
+import { Image } from "react-native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import LoginScreen from "../screen/auth/LoginScreen";
-import SignUpScreen from "../screen/auth/SignupScreen";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { AuthStackParamList } from "../model/model";
 
-const Stack = createNativeStackNavigator<AuthStackParamList>();
+import LoginScreen from "../screen/auth/LoginScreen";
+import SignUpScreen from "../screen/auth/SignupScreen";
+import HomeScreen from "../screen/home/HomeScreen";
+import ProfileScreen from "../screen/profile/ProfileScreen";
 
-export default function AuthNavigator() {
+const Stack = createNativeStackNavigator<AuthStackParamList>();
+const Tab = createBottomTabNavigator();
+
+export function AuthNavigator() {
   return (
     <Stack.Navigator
       initialRouteName="Login"
@@ -23,5 +29,58 @@ export default function AuthNavigator() {
         options={{ title: "회원가입" }}
       />
     </Stack.Navigator>
+  );
+}
+
+function HomeStack() {
+  return (
+    <Stack.Navigator
+      initialRouteName="Home"
+      screenOptions={{ headerShown: false }}
+    >
+      <Stack.Screen name="Home" component={HomeScreen} />
+    </Stack.Navigator>
+  );
+}
+
+function ProfileStack() {
+  return (
+    <Stack.Navigator
+      initialRouteName="Profile"
+      screenOptions={{ headerShown: false }}
+    >
+      <Stack.Screen name="Profile" component={ProfileScreen} />
+    </Stack.Navigator>
+  );
+}
+
+export function MainBottomTabNavigator() {
+  return (
+    <Tab.Navigator screenOptions={{ tabBarShowLabel: false }}>
+      <Tab.Screen
+        name="HomeStack"
+        component={HomeStack}
+        options={{
+          tabBarIcon: ({ color, size }) => (
+            <Image
+              source={require("../assets/images/home.png")}
+              style={{ width: size, height: size, tintColor: color }}
+            />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="ProfileStack"
+        component={ProfileStack}
+        options={{
+          tabBarIcon: ({ color, size }) => (
+            <Image
+              source={require("../assets/images/profile.png")}
+              style={{ width: size, height: size, tintColor: color }}
+            />
+          ),
+        }}
+      />
+    </Tab.Navigator>
   );
 }
