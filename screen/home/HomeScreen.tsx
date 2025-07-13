@@ -9,11 +9,13 @@ import {
   TouchableOpacity,
   Image,
   Alert,
+  TextInput,
 } from "react-native";
 import {
   getPosts,
   addLike,
   removeLike,
+  addComment,
   getComments,
 } from "../../network/network";
 import { Post, PostComment } from "../../model/model";
@@ -30,6 +32,9 @@ const HomeScreen = () => {
   const [comments, setComments] = useState<{ [postId: string]: PostComment[] }>(
     {}
   );
+  const [commentInputs, setCommentInputs] = useState<{
+    [postId: string]: string;
+  }>({});
 
   useEffect(() => {
     const unsubscribe = getPosts((data) => {
@@ -98,6 +103,37 @@ const HomeScreen = () => {
     }
   };
 
+  // 댓글 등록
+  const handleAddComment = async (postId: string) => {
+    const content = commentInputs[postId];
+    if (!content || !auth.currentUser) return;
+
+    const userId = auth.currentUser.uid;
+    const userName = auth.currentUser.displayName || "익명"; // null 방지
+    const userProfile = auth.currentUser.photoURL || null;
+
+    try {
+      setIsLoading(true);
+      await addComment({
+        postId,
+        userId,
+        userName,
+        content,
+        userProfile,
+      });
+      setCommentInputs((prev) => ({ ...prev, [postId]: "" }));
+    } catch (error) {
+      Alert.alert("오류", "댓글 작성 중 문제가 발생했습니다.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // 댓글 입력 핸들러
+  const handleCommentInput = (postId: string, text: string) => {
+    setCommentInputs((prev) => ({ ...prev, [postId]: text }));
+  };
+
   const renderPostCard = ({ item }: { item: Post }) => (
     <View style={styles.postCard}>
       <View style={styles.postHeader}>
@@ -160,7 +196,7 @@ const HomeScreen = () => {
 
       {/* 댓글 목록 */}
       <View style={styles.commentList}>
-        {comments[item.id].map((item) => (
+        {comments[item.id]?.map((item) => (
           <View key={item.id} style={styles.commentItem}>
             <View style={styles.commentContent}>
               <Text style={styles.commentUserName}>{item.userName}</Text>
@@ -168,6 +204,22 @@ const HomeScreen = () => {
             </View>
           </View>
         ))}
+      </View>
+
+      {/* 댓글 입력창 */}
+      <View style={styles.commentInputRow}>
+        <TextInput
+          style={styles.commentInput}
+          value={commentInputs[item.id] || ""}
+          onChangeText={(text) => handleCommentInput(item.id, text)}
+          placeholder="댓글을 입력하세요"
+        />
+        <TouchableOpacity
+          onPress={() => handleAddComment(item.id)}
+          style={styles.commentSendBtn}
+        >
+          <Text style={{ color: "#007AFF", fontWeight: "bold" }}>등록</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -362,5 +414,25 @@ const styles = StyleSheet.create({
   commentText: {
     fontSize: 13,
     color: colors.gray_333333,
+  },
+  commentInputRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 8,
+  },
+  commentInput: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: "#eee",
+    borderRadius: 16,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    fontSize: 14,
+    backgroundColor: "#fafafa",
+  },
+  commentSendBtn: {
+    marginLeft: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 6,
   },
 });

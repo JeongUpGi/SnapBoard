@@ -216,6 +216,30 @@ export async function removeLike(postId: string, userId: string) {
     console.error("좋아요 제거 오류:", error);
   }
 }
+
+// 댓글 추가
+export async function addComment({
+  postId,
+  userId,
+  userName,
+  content,
+  userProfile,
+}: {
+  postId: string;
+  userId: string;
+  userName: string;
+  content: string;
+  userProfile?: string | null;
+}) {
+  await addDoc(collection(db, "posts", postId, "comments"), {
+    userId,
+    userName,
+    content,
+    userProfile: userProfile || null, // 프로필이 없으면 null
+    createdAt: serverTimestamp(),
+  });
+}
+
 // 댓글 get
 export function getComments(
   postId: string,
