@@ -30,7 +30,11 @@ export default function App() {
 
   return (
     <NavigationContainer>
-      {user && user.uid ? <MainBottomTabNavigator /> : <AuthNavigator />}
+      {user && user.uid && user.emailVerified ? (
+        <MainBottomTabNavigator />
+      ) : (
+        <AuthNavigator />
+      )}
     </NavigationContainer>
   );
 }
