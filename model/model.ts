@@ -62,4 +62,5 @@ export interface Post {
   authorName: string;
   createdAt: Date;
   likeCount: number;
+  isLiked: boolean; // 현재 사용자가 좋아요를 눌렀는지 여부
 }

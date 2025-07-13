@@ -8,9 +8,11 @@ import {
   StyleSheet,
   TouchableOpacity,
   Image,
+  Alert,
 } from "react-native";
-import { getPosts } from "../../network/network";
+import { getPosts, addLike, removeLike } from "../../network/network";
 import { Post } from "../../model/model";
+import { auth } from "../../firebaseConfig";
 
 import { colors } from "../../assets/colors/color";
 import { formatDate } from "../../utils/formatHelper";
@@ -19,6 +21,7 @@ import { Header } from "../../component/common/Header";
 const HomeScreen = () => {
   const [posts, setPosts] = useState<Post[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const processingLikesRef = React.useRef<Set<string>>(new Set()); //중복처리 방지를 위한 Ref
 
   useEffect(() => {
     const unsubscribe = getPosts((data) => {
@@ -28,6 +31,50 @@ const HomeScreen = () => {
 
     return unsubscribe;
   }, []);
+
+  // 좋아요 버튼 클릭 핸들러
+  const handleLikePress = async (postId: string) => {
+    if (!auth.currentUser || processingLikesRef.current.has(postId)) return;
+
+    const user = auth.currentUser;
+    processingLikesRef.current.add(postId);
+
+    const prevPost = posts.find((post) => post.id === postId);
+    // 현재 게시글 (isLiked의 경우 각 userId에 맞게 보관 중)
+    const currentPost = posts.find((post) => post.id === postId);
+
+    // UI 선업데이트
+    setPosts((prevPosts) =>
+      prevPosts.map((post) =>
+        post.id === postId
+          ? {
+              ...post,
+              isLiked: !post.isLiked,
+              likeCount: post.isLiked ? post.likeCount - 1 : post.likeCount + 1,
+            }
+          : post
+      )
+    );
+
+    try {
+      if (currentPost?.isLiked) {
+        await removeLike(postId, user.uid);
+      } else {
+        await addLike(postId, user.uid);
+      }
+    } catch (error) {
+      // 서버 오류 시 원래 상태로 롤백
+      setPosts((prevPosts) =>
+        prevPosts.map((post) => (post.id === postId ? prevPost! : post))
+      );
+      Alert.alert(
+        "오류",
+        "좋아요 처리 중 문제가 발생했습니다.\n잠시 후 다시 시도해주세요."
+      );
+    } finally {
+      processingLikesRef.current.delete(postId);
+    }
+  };
 
   const renderPostCard = ({ item }: { item: Post }) => (
     <View style={styles.postCard}>
@@ -64,9 +111,17 @@ const HomeScreen = () => {
 
       {/* 버튼 섹션 (좋아요, 댓글) */}
       <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.buttonWrapper}>
+        <TouchableOpacity
+          style={styles.buttonWrapper}
+          onPress={() => handleLikePress(item.id)}
+          disabled={processingLikesRef.current.has(item.id)}
+        >
           <Image
-            source={require("../../assets/images/empty_love.png")}
+            source={
+              item.isLiked
+                ? require("../../assets/images/love.png")
+                : require("../../assets/images/empty_love.png")
+            }
             style={styles.buttonIcon}
           />
           <Text style={styles.actionText}>{item.likeCount || 0}</Text>
@@ -219,6 +274,8 @@ const styles = StyleSheet.create({
   buttonWrapper: {
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "center",
+    flex: 1,
   },
   buttonIcon: {
     width: 20,

@@ -1,14 +1,18 @@
 import { auth } from "../firebaseConfig";
 import { db } from "../firebaseConfig";
-import { doc, setDoc } from "firebase/firestore";
 import {
   doc,
+  setDoc,
   collection,
   addDoc,
   serverTimestamp,
   onSnapshot,
   orderBy,
   query,
+  getDoc,
+  deleteDoc,
+  updateDoc,
+  increment,
 } from "firebase/firestore";
 import {
   createUserWithEmailAndPassword,
@@ -176,4 +180,38 @@ export function getPosts(callback: (posts: Post[]) => void) {
       callback(posts);
     }
   });
+}
+
+// 좋아요 추가
+export async function addLike(postId: string, userId: string) {
+  try {
+    // 좋아요 문서 추가
+    await setDoc(doc(db, "posts", postId, "likes", userId), {
+      userId,
+      postId,
+      createdAt: serverTimestamp(),
+    });
+
+    // 게시글의 좋아요 수 증가
+    await updateDoc(doc(db, "posts", postId), {
+      likeCount: increment(1),
+    });
+  } catch (error) {
+    console.error("좋아요 추가 오류:", error);
+  }
+}
+
+// 좋아요 제거
+export async function removeLike(postId: string, userId: string) {
+  try {
+    // 좋아요 문서 삭제
+    await deleteDoc(doc(db, "posts", postId, "likes", userId));
+
+    // 게시글의 좋아요 수 감소
+    await updateDoc(doc(db, "posts", postId), {
+      likeCount: increment(-1),
+    });
+  } catch (error) {
+    console.error("좋아요 제거 오류:", error);
+  }
 }
