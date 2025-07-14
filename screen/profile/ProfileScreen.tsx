@@ -13,10 +13,11 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { signOut } from "firebase/auth";
-import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { doc, getDoc, updateDoc, deleteDoc } from "firebase/firestore";
 import { auth, db } from "../../firebaseConfig";
 import { colors } from "../../assets/colors/color";
 import { Header } from "../../component/common/Header";
+import { deleteUserAccount } from "../../network/network";
 
 const ProfileScreen = () => {
   const [nickname, setNickname] = useState("");
@@ -49,6 +50,39 @@ const ProfileScreen = () => {
   };
 
   const handleSaveNickname = async () => {};
+
+  const handleDeleteAccount = async () => {
+    if (!auth.currentUser) return;
+    Alert.alert(
+      "회원탈퇴",
+      "정말로 회원탈퇴 하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
+      [
+        { text: "취소", style: "cancel" },
+        {
+          text: "탈퇴",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              setIsLoading(true);
+              await deleteUserAccount();
+              Alert.alert("탈퇴 완료", "계정이 삭제되었습니다.");
+            } catch (error: any) {
+              if (error.code === "auth/requires-recent-login") {
+                Alert.alert(
+                  "재로그인 필요",
+                  "보안을 위해 다시 로그인 후 탈퇴를 시도해 주세요."
+                );
+              } else {
+                Alert.alert("탈퇴 실패", error?.message || "알 수 없는 오류");
+              }
+            } finally {
+              setIsLoading(false);
+            }
+          },
+        },
+      ]
+    );
+  };
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.white }}>
@@ -113,7 +147,10 @@ const ProfileScreen = () => {
             <TouchableOpacity onPress={handleLogout} style={styles.logoutBtn}>
               <Text style={styles.logoutBtnText}>로그아웃</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.deleteBtn}>
+            <TouchableOpacity
+              style={styles.deleteBtn}
+              onPress={handleDeleteAccount}
+            >
               <Text style={styles.deleteBtnText}>회원탈퇴</Text>
             </TouchableOpacity>
           </View>

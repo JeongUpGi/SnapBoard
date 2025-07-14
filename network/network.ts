@@ -20,6 +20,7 @@ import {
   sendEmailVerification,
   signInWithEmailAndPassword,
   updateProfile,
+  deleteUser,
 } from "firebase/auth";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
@@ -284,3 +285,14 @@ export const uploadImageAsync = async (uri: string) => {
     return null;
   }
 };
+
+// 회원탈퇴 (계정 삭제)
+export async function deleteUserAccount() {
+  if (!auth.currentUser) throw new Error("로그인된 사용자가 없습니다.");
+  try {
+    await deleteDoc(doc(db, "users", auth.currentUser.uid));
+    await deleteUser(auth.currentUser);
+  } catch (error: any) {
+    throw error;
+  }
+}
