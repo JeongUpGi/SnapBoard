@@ -17,6 +17,7 @@ import {
   removeLike,
   addComment,
   getComments,
+  isUserExists,
 } from "../../network/network";
 import { Post, PostComment, StackParamList } from "../../model/model";
 import { auth } from "../../firebaseConfig";
@@ -41,8 +42,23 @@ const HomeScreen = () => {
   }>({});
 
   useEffect(() => {
-    const unsubscribe = getPosts((data) => {
-      setPosts(data);
+    const unsubscribe = getPosts(async (data) => {
+      const authorIds = Array.from(new Set(data.map((post) => post.authorId)));
+
+      // 각 authorId에 대해 유저 존재 여부 확인
+      const userExistMap: { [uid: string]: boolean } = {};
+      await Promise.all(
+        authorIds.map(async (uid) => {
+          userExistMap[uid] = await isUserExists(uid);
+        })
+      );
+
+      // posts에 userExists 필드 추가
+      const postsWithUserExists = data.map((post) => ({
+        ...post,
+        userExists: userExistMap[post.authorId],
+      }));
+      setPosts(postsWithUserExists);
       setIsLoading(false);
     });
 
@@ -138,17 +154,27 @@ const HomeScreen = () => {
     setCommentInputs((prev) => ({ ...prev, [postId]: text }));
   };
 
-  const renderPostCard = ({ item }: { item: Post }) => (
+  const renderPostCard = ({
+    item,
+  }: {
+    item: Post & { userExists?: boolean };
+  }) => (
     <View style={styles.postCard}>
       <View style={styles.postHeader}>
         <View style={styles.authorInfo}>
           <View style={styles.profile}>
             <Text style={styles.profileText}>
-              {item.authorName?.charAt(0)?.toUpperCase() || "익명"}
+              {item.userExists === false
+                ? "삭"
+                : item.authorName?.charAt(0)?.toUpperCase() || "?"}
             </Text>
           </View>
           <View style={styles.authorDetails}>
-            <Text style={styles.authorName}>{item.authorName || "익명"}</Text>
+            <Text style={styles.authorName}>
+              {item.userExists === false
+                ? "삭제된 계정"
+                : item.authorName || "익명"}
+            </Text>
             <Text style={styles.postTime}>{formatDate(item.createdAt)}</Text>
           </View>
         </View>
@@ -203,7 +229,9 @@ const HomeScreen = () => {
         {comments[item.id]?.map((item) => (
           <View key={item.id} style={styles.commentItem}>
             <View style={styles.commentContent}>
-              <Text style={styles.commentUserName}>{item.userName}</Text>
+              <Text style={styles.commentUserName}>
+                {item.userName || "삭제된 계정"}
+              </Text>
               <Text style={styles.commentText}>{item.content}</Text>
             </View>
           </View>

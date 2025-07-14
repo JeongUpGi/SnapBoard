@@ -296,3 +296,9 @@ export async function deleteUserAccount() {
     throw error;
   }
 }
+
+// 유저 존재 여부 확인 함수
+export async function isUserExists(userId: string): Promise<boolean> {
+  const userDoc = await getDoc(doc(db, "users", userId));
+  return userDoc.exists();
+}
