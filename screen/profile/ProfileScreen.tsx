@@ -176,6 +176,16 @@ const ProfileScreen = () => {
   const handlePickProfileImage = async () => {
     if (!auth.currentUser) return;
 
+    // 권한 요청
+    const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!perm.granted) {
+      Alert.alert(
+        "권한 필요",
+        "이미지 선택을 위해 갤러리 접근 권한이 필요합니다."
+      );
+      return;
+    }
+
     // 이미지 선택
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,

@@ -49,6 +49,16 @@ const PostScreen = () => {
 
   // 이미지 추가
   const handleAddImage = async () => {
+    // 권한 요청
+    const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!perm.granted) {
+      Alert.alert(
+        "권한 필요",
+        "이미지 선택을 위해 갤러리 접근 권한이 필요합니다."
+      );
+      return;
+    }
+
     const uri = await pickImage();
     if (uri) {
       setSelectedImage(uri);
