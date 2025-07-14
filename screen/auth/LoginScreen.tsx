@@ -116,48 +116,6 @@ const LoginScreen = () => {
                 </Text>
               </Text>
             </View>
-
-            <View style={styles.dividerWrapper}>
-              <View style={styles.dividerLine} />
-              <Text style={styles.dividerText}>또는</Text>
-              <View style={styles.dividerLine} />
-            </View>
-
-            {/* 소셜 로그인 버튼 섹션 */}
-            <View style={styles.socialContainer}>
-              {/* Google 로그인 */}
-              <TouchableOpacity style={styles.googleButton} onPress={() => {}}>
-                <View style={{ flexDirection: "row", alignItems: "center" }}>
-                  <Image
-                    source={require("../../assets/images/google_logo.png")}
-                    style={styles.socialIcon}
-                  />
-                  <Text style={styles.socialText}>구글로 계속하기</Text>
-                </View>
-              </TouchableOpacity>
-
-              {/* Kakao 로그인 */}
-              <TouchableOpacity style={styles.kakaoButton} onPress={() => {}}>
-                <View style={{ flexDirection: "row", alignItems: "center" }}>
-                  <Image
-                    source={require("../../assets/images/kakao_logo.png")}
-                    style={styles.socialIcon}
-                  />
-                  <Text style={styles.socialText}>카카오로 계속하기</Text>
-                </View>
-              </TouchableOpacity>
-
-              {/* Naver 로그인 */}
-              <TouchableOpacity style={styles.naverButton} onPress={() => {}}>
-                <View style={{ flexDirection: "row", alignItems: "center" }}>
-                  <Image
-                    source={require("../../assets/images/naver_logo.png")}
-                    style={styles.socialIcon}
-                  />
-                  <Text style={styles.socialText}>네이버로 계속하기</Text>
-                </View>
-              </TouchableOpacity>
-            </View>
           </View>
         </View>
       </TouchableWithoutFeedback>
@@ -185,9 +143,10 @@ const styles = StyleSheet.create({
   topContainer: {
     flex: 1,
     alignItems: "center",
+    justifyContent: "center",
   },
   bottomContainer: {
-    flex: 2,
+    flex: 1,
     paddingHorizontal: 20,
   },
   appLogo: {
@@ -236,54 +195,5 @@ const styles = StyleSheet.create({
     color: colors.blue,
     fontWeight: "bold",
     textDecorationLine: "underline",
-  },
-  socialContainer: {
-    gap: 15,
-  },
-  googleButton: {
-    backgroundColor: colors.white,
-    borderColor: colors.gray_c0c0c0,
-    borderWidth: 1,
-    borderRadius: 5,
-    paddingVertical: 10,
-    alignItems: "center",
-  },
-  kakaoButton: {
-    backgroundColor: colors.kakako,
-    borderRadius: 5,
-    paddingVertical: 10,
-    alignItems: "center",
-  },
-  naverButton: {
-    backgroundColor: colors.naver,
-    borderRadius: 5,
-    paddingVertical: 10,
-    alignItems: "center",
-  },
-  socialIcon: {
-    width: 24,
-    height: 24,
-    marginRight: 8,
-  },
-  socialText: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: colors.black,
-  },
-  dividerWrapper: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginVertical: 24,
-  },
-  dividerLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: colors.gray_d3d3d3,
-  },
-  dividerText: {
-    marginHorizontal: 12,
-    color: colors.gray_808080,
-    fontSize: 15,
-    fontWeight: "bold",
   },
 });
