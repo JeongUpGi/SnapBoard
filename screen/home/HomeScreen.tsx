@@ -222,7 +222,7 @@ const HomeScreen = () => {
           onPress={() => handleAddComment(item.id)}
           style={styles.commentSendBtn}
         >
-          <Text style={{ color: "#007AFF", fontWeight: "bold" }}>등록</Text>
+          <Text style={{ color: colors.blue, fontWeight: "bold" }}>등록</Text>
         </TouchableOpacity>
       </View>
     </View>

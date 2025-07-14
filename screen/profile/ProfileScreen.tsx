@@ -1,15 +1,45 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   SafeAreaView,
   Text,
   StyleSheet,
   TouchableOpacity,
   Alert,
+  View,
+  Image,
+  TextInput,
+  TouchableWithoutFeedback,
+  Keyboard,
+  ActivityIndicator,
 } from "react-native";
 import { signOut } from "firebase/auth";
-import { auth } from "../../firebaseConfig";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { auth, db } from "../../firebaseConfig";
+import { colors } from "../../assets/colors/color";
+import { Header } from "../../component/common/Header";
 
 const ProfileScreen = () => {
+  const [nickname, setNickname] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [profileImage, setProfileImage] = useState<string | null>(null);
+  const [editingNickname, setEditingNickname] = useState(false);
+  const [nicknameInput, setNicknameInput] = useState("");
+
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      setIsLoading(true);
+      if (!auth.currentUser) return;
+      const userDoc = await getDoc(doc(db, "users", auth.currentUser.uid));
+      if (userDoc.exists()) {
+        const data = userDoc.data();
+        setNickname(data.nickname || "");
+        setProfileImage(data.profileImage || null);
+      }
+      setIsLoading(false);
+    };
+    fetchUserProfile();
+  }, []);
+
   const handleLogout = async () => {
     try {
       await signOut(auth);
@@ -18,22 +48,204 @@ const ProfileScreen = () => {
     }
   };
 
+  const handleSaveNickname = async () => {};
+
   return (
-    <SafeAreaView>
-      <Text>profileScreen</Text>
-      <TouchableOpacity
-        onPress={handleLogout}
-        style={{
-          marginTop: 20,
-          padding: 12,
-          backgroundColor: "#eee",
-          borderRadius: 8,
-        }}
-      >
-        <Text style={{ color: "#333", fontWeight: "bold" }}>로그아웃</Text>
-      </TouchableOpacity>
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.white }}>
+      <Header.default title="프로필 수정" titleStyle={styles.headerTitle} />
+
+      {isLoading && (
+        <View style={styles.loadingOverlay}>
+          <ActivityIndicator size="large" color={colors.blue} />
+        </View>
+      )}
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+        <View style={styles.container}>
+          <View style={styles.profileContainer}>
+            {/* 프로필 이미지 */}
+            <View style={styles.profileWrapper}>
+              {profileImage ? (
+                <Image source={{ uri: profileImage }} style={styles.profile} />
+              ) : (
+                <View style={styles.profilePlaceholderWrapper}>
+                  <Text style={{ color: colors.white, fontSize: 25 }}>?</Text>
+                </View>
+              )}
+            </View>
+            {/* 닉네임 표시/수정 */}
+            <View style={styles.nicknameWrapper}>
+              <Text style={styles.nickname}>닉네임</Text>
+              {editingNickname ? (
+                <>
+                  <TextInput
+                    style={styles.nicknameInput}
+                    value={nicknameInput}
+                    onChangeText={setNicknameInput}
+                    placeholder="닉네임을 입력하세요"
+                    maxLength={16}
+                    autoFocus
+                  />
+                  <TouchableOpacity
+                    style={styles.saveBtn}
+                    onPress={handleSaveNickname}
+                  >
+                    <Text style={styles.saveBtnText}>저장</Text>
+                  </TouchableOpacity>
+                </>
+              ) : (
+                <>
+                  <Text style={styles.nicknameText}>{nickname}</Text>
+                  <TouchableOpacity
+                    style={styles.editBtn}
+                    onPress={() => {
+                      setNicknameInput("");
+                      setEditingNickname(true);
+                    }}
+                  >
+                    <Text style={styles.editBtnText}>수정</Text>
+                  </TouchableOpacity>
+                </>
+              )}
+            </View>
+          </View>
+          {/* 로그아웃/회원탈퇴 버튼 */}
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity onPress={handleLogout} style={styles.logoutBtn}>
+              <Text style={styles.logoutBtnText}>로그아웃</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.deleteBtn}>
+              <Text style={styles.deleteBtnText}>회원탈퇴</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </TouchableWithoutFeedback>
     </SafeAreaView>
   );
 };
 
 export default ProfileScreen;
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 30,
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+  },
+
+  loadingOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 1000,
+  },
+  profileContainer: {
+    alignItems: "center",
+    marginTop: 32,
+    marginBottom: 40,
+  },
+  profileWrapper: {
+    alignItems: "center",
+    marginBottom: 24,
+  },
+  profile: {
+    width: 90,
+    height: 90,
+    borderRadius: 45,
+    backgroundColor: colors.gray_808080,
+  },
+  profilePlaceholderWrapper: {
+    width: 90,
+    height: 90,
+    borderRadius: 45,
+    backgroundColor: colors.blue,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  nicknameWrapper: {
+    flexDirection: "row",
+    alignItems: "center",
+    width: "100%",
+    marginTop: 8,
+  },
+  nickname: {
+    fontSize: 16,
+    fontWeight: "bold",
+    marginRight: 10,
+    color: "#333",
+  },
+  nicknameInput: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: "#eee",
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    fontSize: 15,
+    backgroundColor: colors.gray_f5f5f5,
+    marginRight: 8,
+  },
+  nicknameText: {
+    flex: 1,
+    fontSize: 16,
+    color: colors.gray_333333,
+    marginRight: 8,
+  },
+  saveBtn: {
+    backgroundColor: colors.blue,
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+  },
+  saveBtnText: {
+    color: colors.white,
+    fontWeight: "bold",
+    fontSize: 14,
+  },
+  editBtn: {
+    backgroundColor: colors.gray_dcdcdc,
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+  },
+  editBtnText: {
+    color: colors.blue,
+    fontWeight: "bold",
+    fontSize: 14,
+  },
+  buttonContainer: {
+    marginTop: 30,
+  },
+  logoutBtn: {
+    backgroundColor: colors.gray_f5f5f5,
+    borderRadius: 12,
+    padding: 15,
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  logoutBtnText: {
+    color: colors.gray_333333,
+    fontWeight: "bold",
+    fontSize: 16,
+  },
+  deleteBtn: {
+    backgroundColor: colors.red_fff0f0,
+    borderRadius: 12,
+    padding: 15,
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: colors.red_ffb3b3,
+  },
+  deleteBtnText: {
+    color: colors.red_ff3b30,
+    fontWeight: "bold",
+    fontSize: 16,
+  },
+});
