@@ -12,11 +12,15 @@ import {
   Keyboard,
   Alert,
   ActivityIndicator,
+  Image,
 } from "react-native";
 import { NavigationProp, useNavigation } from "@react-navigation/native";
 
 import { createPost } from "../../network/network";
 import { StackParamList } from "../../model/model";
+
+import { uploadImageAsync } from "../../network/network";
+import * as ImagePicker from "expo-image-picker";
 
 import { colors } from "../../assets/colors/color";
 
@@ -26,12 +30,44 @@ const PostScreen = () => {
   const [content, setContent] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [imageUploading, setImageUploading] = useState(false);
+
+  // 이미지 선택
+  const pickImage = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      quality: 0.7,
+    });
+
+    if (!result.canceled) {
+      return result.assets[0].uri;
+    }
+    return null;
+  };
+
+  // 이미지 추가
+  const handleAddImage = async () => {
+    const uri = await pickImage();
+    if (uri) {
+      setSelectedImage(uri);
+    }
+  };
+
+  // 이미지 제거
+  const handleRemoveImage = () => {
+    setSelectedImage(null);
+  };
 
   const handleSubmit = async () => {
     setIsLoading(true);
-
+    let imageUrl = undefined;
     try {
-      await createPost({ title, content }); // 추후 image도 추가해야함
+      if (selectedImage) {
+        imageUrl = await uploadImageAsync(selectedImage);
+        if (!imageUrl) throw new Error("이미지 업로드 실패");
+      }
+      await createPost({ title, content, imageUrl });
       Alert.alert("게시글 등록 완료", "게시글이 성공적으로 등록되었습니다.", [
         {
           text: "확인",
@@ -50,11 +86,9 @@ const PostScreen = () => {
     }
   };
 
-  const handleAddImage = () => {};
-
   return (
     <SafeAreaView style={styles.container}>
-      {isLoading && (
+      {(isLoading || imageUploading) && (
         <View style={styles.loadingOverlay}>
           <ActivityIndicator size="large" color={colors.blue} />
         </View>
@@ -96,10 +130,26 @@ const PostScreen = () => {
             {/* 이미지 첨부 섹션 */}
             <View style={styles.imageSection}>
               <Text style={styles.inputTitle}>이미지 첨부</Text>
-
               {selectedImage ? (
                 <View style={styles.imageContainer}>
-                  {/* 이미지 있을 경우 */}
+                  <TouchableOpacity
+                    style={{
+                      position: "absolute",
+                      top: 8,
+                      right: 8,
+                      zIndex: 2,
+                    }}
+                    onPress={handleRemoveImage}
+                  >
+                    <Text style={{ color: colors.gray_808080, fontSize: 18 }}>
+                      ✕
+                    </Text>
+                  </TouchableOpacity>
+                  <Image
+                    source={{ uri: selectedImage }}
+                    style={{ width: "100%", height: "100%" }}
+                    resizeMode="contain"
+                  />
                 </View>
               ) : (
                 <TouchableOpacity
@@ -122,7 +172,7 @@ const PostScreen = () => {
                   styles.submitButtonDisabled,
               ]}
               onPress={handleSubmit}
-              disabled={!title.trim() || !content.trim()}
+              disabled={!title.trim() || !content.trim() || imageUploading}
             >
               <Text style={styles.submitButtonText}>등록하기</Text>
             </TouchableOpacity>

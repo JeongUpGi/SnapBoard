@@ -1,5 +1,6 @@
 import { auth } from "../firebaseConfig";
 import { db } from "../firebaseConfig";
+import { storage } from "../firebaseConfig";
 import {
   doc,
   setDoc,
@@ -20,6 +21,7 @@ import {
   signInWithEmailAndPassword,
   updateProfile,
 } from "firebase/auth";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 import {
   LoginData,
@@ -264,3 +266,21 @@ export function getComments(
     callback(comments);
   });
 }
+
+// Firebase Storage 업로드 함수
+export const uploadImageAsync = async (uri: string) => {
+  if (!uri) return null;
+  try {
+    const response = await fetch(uri);
+    const blob = await response.blob();
+    const filename = `postImages/${Date.now()}_${Math.floor(
+      Math.random() * 10000
+    )}.jpg`;
+    const storageRef = ref(storage, filename);
+    await uploadBytes(storageRef, blob);
+    const downloadURL = await getDownloadURL(storageRef);
+    return downloadURL;
+  } catch (e) {
+    return null;
+  }
+};
