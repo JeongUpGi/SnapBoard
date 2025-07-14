@@ -13,13 +13,22 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { signOut } from "firebase/auth";
-import { doc, getDoc, updateDoc, deleteDoc } from "firebase/firestore";
+import {
+  doc,
+  getDoc,
+  updateDoc,
+  getDocs,
+  collection,
+  query,
+  where,
+} from "firebase/firestore";
 import { auth, db } from "../../firebaseConfig";
 import { colors } from "../../assets/colors/color";
 import { Header } from "../../component/common/Header";
 import { deleteUserAccount } from "../../network/network";
 import { updateProfile } from "firebase/auth";
 import { updateNicknameEverywhere } from "../../network/network";
+import { deletePost } from "../../network/network";
 
 const ProfileScreen = () => {
   const [nickname, setNickname] = useState("");
@@ -27,6 +36,7 @@ const ProfileScreen = () => {
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [editingNickname, setEditingNickname] = useState(false);
   const [nicknameInput, setNicknameInput] = useState("");
+  const [myPosts, setMyPosts] = useState<any[]>([]);
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -42,6 +52,45 @@ const ProfileScreen = () => {
     };
     fetchUserProfile();
   }, []);
+
+  // 내 게시글 불러오기
+  useEffect(() => {
+    const fetchMyPosts = async () => {
+      if (!auth.currentUser) return;
+      const q = query(
+        collection(db, "posts"),
+        where("authorId", "==", auth.currentUser.uid)
+      );
+      const snap = await getDocs(q);
+      setMyPosts(snap.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
+    };
+    fetchMyPosts();
+  }, [nickname]);
+
+  // 게시글 삭제
+  const handleDeletePost = (postId: string) => {
+    Alert.alert("게시글 삭제", "게시글을 삭제하시겠습니까?", [
+      { text: "취소", style: "cancel" },
+      {
+        text: "삭제",
+        style: "destructive",
+        onPress: async () => {
+          setIsLoading(true);
+          try {
+            await deletePost(postId);
+            setMyPosts((prev) => prev.filter((p) => p.id !== postId));
+          } catch (error: any) {
+            Alert.alert(
+              "오류",
+              error?.message || "게시글 삭제 중 오류가 발생했습니다."
+            );
+          } finally {
+            setIsLoading(false);
+          }
+        },
+      },
+    ]);
+  };
 
   const handleLogout = async () => {
     try {
@@ -175,6 +224,58 @@ const ProfileScreen = () => {
               )}
             </View>
           </View>
+
+          {/* 내가 작성한 게시글 리스트 */}
+          <View style={{ marginBottom: 30 }}>
+            <Text
+              style={{ fontWeight: "bold", fontSize: 16, marginBottom: 10 }}
+            >
+              내가 작성한 게시글
+            </Text>
+            {myPosts.length === 0 ? (
+              <Text style={{ color: colors.gray_808080, marginBottom: 10 }}>
+                작성한 게시글이 없습니다.
+              </Text>
+            ) : (
+              myPosts.map((post) => (
+                <View
+                  key={post.id}
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    marginBottom: 10,
+                    backgroundColor: colors.gray_f5f5f5,
+                    borderRadius: 8,
+                    padding: 10,
+                  }}
+                >
+                  <View style={{ flex: 1 }}>
+                    <Text
+                      style={{ fontWeight: "bold", fontSize: 15 }}
+                      numberOfLines={1}
+                    >
+                      {post.title}
+                    </Text>
+                    <Text style={{ fontSize: 12, color: colors.gray_808080 }}>
+                      {post.createdAt?.toDate
+                        ? post.createdAt.toDate().toLocaleString()
+                        : ""}
+                    </Text>
+                  </View>
+                  <TouchableOpacity
+                    onPress={() => handleDeletePost(post.id)}
+                    style={{ paddingHorizontal: 10 }}
+                  >
+                    <Image
+                      source={require("../../assets/images/delete.png")}
+                      style={styles.deleteImage}
+                    />
+                  </TouchableOpacity>
+                </View>
+              ))
+            )}
+          </View>
+
           {/* 로그아웃/회원탈퇴 버튼 */}
           <View style={styles.buttonContainer}>
             <TouchableOpacity onPress={handleLogout} style={styles.logoutBtn}>
@@ -317,5 +418,9 @@ const styles = StyleSheet.create({
     color: colors.red_ff3b30,
     fontWeight: "bold",
     fontSize: 16,
+  },
+  deleteImage: {
+    width: 30,
+    height: 30,
   },
 });

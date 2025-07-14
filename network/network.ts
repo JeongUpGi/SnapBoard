@@ -339,6 +339,21 @@ export async function updateNicknameEverywhere(
 
   await Promise.all([...postUpdatePromises, ...commentUpdatePromises]);
 }
+
+// 게시글 삭제 (게시글 + 하위 댓글 모두 삭제)
+export async function deletePost(postId: string) {
+  // 1. 댓글 모두 삭제
+  const commentsSnapshot = await getDocs(
+    collection(db, "posts", postId, "comments")
+  );
+  const commentDeletePromises = commentsSnapshot.docs.map((docSnap) =>
+    deleteDoc(doc(db, "posts", postId, "comments", docSnap.id))
+  );
+  await Promise.all(commentDeletePromises);
+  // 2. 게시글 삭제
+  await deleteDoc(doc(db, "posts", postId));
+}
+
 // 댓글 삭제
 export async function deleteComment(postId: string, commentId: string) {
   await deleteDoc(doc(db, "posts", postId, "comments", commentId));
