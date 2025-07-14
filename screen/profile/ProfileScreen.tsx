@@ -18,6 +18,8 @@ import { auth, db } from "../../firebaseConfig";
 import { colors } from "../../assets/colors/color";
 import { Header } from "../../component/common/Header";
 import { deleteUserAccount } from "../../network/network";
+import { updateProfile } from "firebase/auth";
+import { updateNicknameEverywhere } from "../../network/network";
 
 const ProfileScreen = () => {
   const [nickname, setNickname] = useState("");
@@ -49,7 +51,38 @@ const ProfileScreen = () => {
     }
   };
 
-  const handleSaveNickname = async () => {};
+  const handleSaveNickname = async () => {
+    if (!auth.currentUser) return;
+    const newNickname = nicknameInput.trim();
+    if (!newNickname) {
+      Alert.alert("닉네임을 입력하세요");
+      return;
+    }
+    if (newNickname === nickname) {
+      setEditingNickname(false);
+      return;
+    }
+    setIsLoading(true);
+    try {
+      // 1. Firebase Auth 프로필 업데이트
+      await updateProfile(auth.currentUser, { displayName: newNickname });
+
+      // 2. Firestore users/{uid} 닉네임 업데이트
+      await updateDoc(doc(db, "users", auth.currentUser.uid), {
+        nickname: newNickname,
+      });
+
+      // 3. 모든 게시글/댓글 닉네임 업데이트
+      await updateNicknameEverywhere(auth.currentUser.uid, newNickname);
+      setNickname(newNickname);
+      setEditingNickname(false);
+      Alert.alert("닉네임이 변경되었습니다.");
+    } catch (error: any) {
+      Alert.alert("닉네임 변경 실패", error?.message || "알 수 없는 오류");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleDeleteAccount = async () => {
     if (!auth.currentUser) return;

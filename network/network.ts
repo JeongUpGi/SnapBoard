@@ -14,6 +14,8 @@ import {
   deleteDoc,
   updateDoc,
   increment,
+  getDocs,
+  where,
 } from "firebase/firestore";
 import {
   createUserWithEmailAndPassword,
@@ -301,4 +303,39 @@ export async function deleteUserAccount() {
 export async function isUserExists(userId: string): Promise<boolean> {
   const userDoc = await getDoc(doc(db, "users", userId));
   return userDoc.exists();
+}
+
+// 닉네임 변경 시 모든 게시글/댓글의 닉네임도 변경
+export async function updateNicknameEverywhere(
+  userId: string,
+  newNickname: string
+) {
+  // 1. 게시글 authorName 변경
+  const postsQuery = query(
+    collection(db, "posts"),
+    where("authorId", "==", userId)
+  );
+  const postsSnapshot = await getDocs(postsQuery);
+  const postUpdatePromises = postsSnapshot.docs.map((docSnap) =>
+    updateDoc(doc(db, "posts", docSnap.id), { authorName: newNickname })
+  );
+
+  // 2. 각 게시글의 댓글 userName 변경
+  const commentUpdatePromises: Promise<any>[] = [];
+  for (const postDoc of postsSnapshot.docs) {
+    const commentsQuery = query(
+      collection(db, "posts", postDoc.id, "comments"),
+      where("userId", "==", userId)
+    );
+    const commentsSnapshot = await getDocs(commentsQuery);
+    for (const commentDoc of commentsSnapshot.docs) {
+      commentUpdatePromises.push(
+        updateDoc(doc(db, "posts", postDoc.id, "comments", commentDoc.id), {
+          userName: newNickname,
+        })
+      );
+    }
+  }
+
+  await Promise.all([...postUpdatePromises, ...commentUpdatePromises]);
 }
