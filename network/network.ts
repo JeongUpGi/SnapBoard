@@ -145,10 +145,12 @@ export async function createPost({
   if (!auth.currentUser) return;
 
   const user = auth.currentUser;
+  const userProfile = user.photoURL || null;
 
   await addDoc(collection(db, "posts"), {
     authorId: user.uid,
     authorName: user.displayName,
+    authorProfileImage: userProfile,
     title,
     content,
     imageUrl: imageUrl || null,
@@ -332,6 +334,43 @@ export async function updateNicknameEverywhere(
       commentUpdatePromises.push(
         updateDoc(doc(db, "posts", postDoc.id, "comments", commentDoc.id), {
           userName: newNickname,
+        })
+      );
+    }
+  }
+
+  await Promise.all([...postUpdatePromises, ...commentUpdatePromises]);
+}
+
+// 프로필 이미지 변경 시 모든 게시글/댓글의 프로필 이미지도 변경
+export async function updateProfileImageEverywhere(
+  userId: string,
+  newProfileImage: string
+) {
+  // 1. 게시글 authorProfileImage 변경
+  const postsQuery = query(
+    collection(db, "posts"),
+    where("authorId", "==", userId)
+  );
+  const postsSnapshot = await getDocs(postsQuery);
+  const postUpdatePromises = postsSnapshot.docs.map((docSnap) =>
+    updateDoc(doc(db, "posts", docSnap.id), {
+      authorProfileImage: newProfileImage,
+    })
+  );
+
+  // 2. 각 게시글의 댓글 userProfile 변경
+  const commentUpdatePromises: Promise<any>[] = [];
+  for (const postDoc of postsSnapshot.docs) {
+    const commentsQuery = query(
+      collection(db, "posts", postDoc.id, "comments"),
+      where("userId", "==", userId)
+    );
+    const commentsSnapshot = await getDocs(commentsQuery);
+    for (const commentDoc of commentsSnapshot.docs) {
+      commentUpdatePromises.push(
+        updateDoc(doc(db, "posts", postDoc.id, "comments", commentDoc.id), {
+          userProfile: newProfileImage,
         })
       );
     }

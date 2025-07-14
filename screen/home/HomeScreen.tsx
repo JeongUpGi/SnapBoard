@@ -182,18 +182,25 @@ const HomeScreen = () => {
   const renderPostCard = ({
     item,
   }: {
-    item: Post & { userExists?: boolean };
+    item: Post & { userExists?: boolean; authorProfileImage?: string };
   }) => (
     <View style={styles.postCard}>
       <View style={styles.postHeader}>
         <View style={styles.authorInfo}>
-          <View style={styles.profile}>
-            <Text style={styles.profileText}>
-              {item.userExists === false
-                ? "삭"
-                : item.authorName?.charAt(0)?.toUpperCase() || "?"}
-            </Text>
-          </View>
+          {item.authorProfileImage ? (
+            <Image
+              source={{ uri: item.authorProfileImage }}
+              style={styles.profile}
+            />
+          ) : (
+            <View style={styles.profile}>
+              <Text style={styles.profileText}>
+                {item.userExists === false
+                  ? "삭"
+                  : item.authorName?.charAt(0)?.toUpperCase() || "?"}
+              </Text>
+            </View>
+          )}
           <View style={styles.authorDetails}>
             <Text style={styles.authorName}>
               {item.userExists === false

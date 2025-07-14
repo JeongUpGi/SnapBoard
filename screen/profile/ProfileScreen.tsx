@@ -25,10 +25,16 @@ import {
 import { auth, db } from "../../firebaseConfig";
 import { colors } from "../../assets/colors/color";
 import { Header } from "../../component/common/Header";
-import { deleteUserAccount } from "../../network/network";
+import {
+  deleteUserAccount,
+  deletePost,
+  uploadImageAsync,
+  updateNicknameEverywhere,
+  updateProfileImageEverywhere,
+} from "../../network/network";
 import { updateProfile } from "firebase/auth";
-import { updateNicknameEverywhere } from "../../network/network";
-import { deletePost } from "../../network/network";
+import * as ImagePicker from "expo-image-picker";
+import * as ImageManipulator from "expo-image-manipulator";
 
 const ProfileScreen = () => {
   const [nickname, setNickname] = useState("");
@@ -166,6 +172,45 @@ const ProfileScreen = () => {
     );
   };
 
+  // 프로필 이미지 변경
+  const handlePickProfileImage = async () => {
+    if (!auth.currentUser) return;
+
+    // 이미지 선택
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.8,
+    });
+    if (result.canceled) return;
+    setIsLoading(true);
+    try {
+      // 리사이즈/크롭
+      const manipResult = await ImageManipulator.manipulateAsync(
+        result.assets[0].uri,
+        [{ resize: { width: 300, height: 300 } }],
+        { compress: 0.8, format: ImageManipulator.SaveFormat.JPEG }
+      );
+      const downloadURL = await uploadImageAsync(manipResult.uri);
+      if (!downloadURL) throw new Error("이미지 업로드 실패");
+
+      // Firestore, Auth 업데이트
+      await updateDoc(doc(db, "users", auth.currentUser.uid), {
+        profileImage: downloadURL,
+      });
+      await updateProfile(auth.currentUser, { photoURL: downloadURL });
+      // 모든 게시글/댓글 프로필 이미지 업데이트
+      await updateProfileImageEverywhere(auth.currentUser.uid, downloadURL);
+      setProfileImage(downloadURL);
+      Alert.alert("프로필 이미지가 변경되었습니다.");
+    } catch (e: any) {
+      Alert.alert("오류", e?.message || "이미지 변경 중 오류가 발생했습니다.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.white }}>
       <Header.default title="프로필 수정" titleStyle={styles.headerTitle} />
@@ -180,13 +225,21 @@ const ProfileScreen = () => {
           <View style={styles.profileContainer}>
             {/* 프로필 이미지 */}
             <View style={styles.profileWrapper}>
-              {profileImage ? (
-                <Image source={{ uri: profileImage }} style={styles.profile} />
-              ) : (
-                <View style={styles.profilePlaceholderWrapper}>
-                  <Text style={{ color: colors.white, fontSize: 25 }}>?</Text>
-                </View>
-              )}
+              <TouchableOpacity
+                onPress={handlePickProfileImage}
+                activeOpacity={0.7}
+              >
+                {profileImage ? (
+                  <Image
+                    source={{ uri: profileImage }}
+                    style={styles.profile}
+                  />
+                ) : (
+                  <View style={styles.profilePlaceholderWrapper}>
+                    <Text style={{ color: colors.white, fontSize: 25 }}>?</Text>
+                  </View>
+                )}
+              </TouchableOpacity>
             </View>
             {/* 닉네임 표시/수정 */}
             <View style={styles.nicknameWrapper}>
