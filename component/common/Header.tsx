@@ -33,11 +33,13 @@ const LeftTitleHeader: React.FC<HeaderProps> = ({
   title,
   leftIcon,
   rightIcon,
+  rightTitle,
   headerBackgroundColor,
   onPressRight,
   titleStyle,
   leftIconStyle,
   rightIconStyle,
+  rightTitleStyle,
 }) => {
   return (
     <View style={[styles.headerContainer, headerBackgroundColor]}>
@@ -47,6 +49,7 @@ const LeftTitleHeader: React.FC<HeaderProps> = ({
       </View>
       <TouchableOpacity style={styles.buttonWrapper} onPress={onPressRight}>
         <Image source={rightIcon} style={rightIconStyle} />
+        <Text style={[styles.rightTitle, rightTitleStyle]}>{rightTitle}</Text>
       </TouchableOpacity>
     </View>
   );
@@ -71,14 +74,19 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   buttonWrapper: {
-    width: 40,
-    height: 40,
     alignItems: "center",
     justifyContent: "center",
+    flexDirection: "row",
+    marginRight: 10,
   },
   title: {
     color: colors.black,
     fontSize: 17,
     fontWeight: "bold",
+  },
+  rightTitle: {
+    color: colors.black,
+    fontSize: 15,
+    fontWeight: "semibold",
   },
 });

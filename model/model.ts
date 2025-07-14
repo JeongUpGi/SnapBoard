@@ -14,6 +14,7 @@ export type StackParamList = {
 
 export interface HeaderProps {
   title?: string;
+  rightTitle?: string;
   leftIcon?: undefined;
   rightIcon?: undefined;
   onPressLeft?: () => void;
@@ -23,6 +24,7 @@ export interface HeaderProps {
   headerBackgroundColor?: TextStyle;
   leftIconStyle?: ImageStyle;
   rightIconStyle?: ImageStyle;
+  rightTitleStyle?: TextStyle;
 }
 
 // 회원가입 데이터 인터페이스

@@ -18,14 +18,18 @@ import {
   addComment,
   getComments,
 } from "../../network/network";
-import { Post, PostComment } from "../../model/model";
+import { Post, PostComment, StackParamList } from "../../model/model";
 import { auth } from "../../firebaseConfig";
+
+import { NavigationProp, useNavigation } from "@react-navigation/native";
 
 import { colors } from "../../assets/colors/color";
 import { formatDate } from "../../utils/formatHelper";
 import { Header } from "../../component/common/Header";
 
 const HomeScreen = () => {
+  const navigation = useNavigation<NavigationProp<StackParamList>>();
+
   const [posts, setPosts] = useState<Post[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const processingLikesRef = React.useRef<Set<string>>(new Set()); //중복처리 방지를 위한 Ref
@@ -242,6 +246,10 @@ const HomeScreen = () => {
         titleStyle={styles.headerTitle}
         leftIcon={require("../../assets/images/app_logo.png")}
         leftIconStyle={{ width: 40, height: 40 }}
+        rightTitle="작성"
+        rightIcon={require("../../assets/images/write.png")}
+        rightIconStyle={{ width: 30, height: 30 }}
+        onPressRight={() => navigation.navigate("PostStack")}
       />
 
       {isLoading && (

@@ -23,6 +23,7 @@ import { uploadImageAsync } from "../../network/network";
 import * as ImagePicker from "expo-image-picker";
 
 import { colors } from "../../assets/colors/color";
+import { Header } from "../../component/common/Header";
 
 const PostScreen = () => {
   const navigation = useNavigation<NavigationProp<StackParamList>>();
@@ -93,6 +94,8 @@ const PostScreen = () => {
           <ActivityIndicator size="large" color={colors.blue} />
         </View>
       )}
+
+      <Header.default title="새 게시글 작성" titleStyle={styles.headerTitle} />
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <KeyboardAvoidingView
           style={styles.keyboardAvoidingView}
@@ -189,6 +192,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.white,
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
   },
   keyboardAvoidingView: {
     flex: 1,
