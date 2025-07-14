@@ -339,3 +339,7 @@ export async function updateNicknameEverywhere(
 
   await Promise.all([...postUpdatePromises, ...commentUpdatePromises]);
 }
+// 댓글 삭제
+export async function deleteComment(postId: string, commentId: string) {
+  await deleteDoc(doc(db, "posts", postId, "comments", commentId));
+}

@@ -18,6 +18,7 @@ import {
   addComment,
   getComments,
   isUserExists,
+  deleteComment,
 } from "../../network/network";
 import { Post, PostComment, StackParamList } from "../../model/model";
 import { auth } from "../../firebaseConfig";
@@ -154,6 +155,30 @@ const HomeScreen = () => {
     setCommentInputs((prev) => ({ ...prev, [postId]: text }));
   };
 
+  // 댓글 삭제 핸들러
+  const handleDeleteComment = async (postId: string, commentId: string) => {
+    Alert.alert("댓글 삭제", "댓글을 삭제하시겠습니까?", [
+      { text: "취소", style: "cancel" },
+      {
+        text: "삭제",
+        style: "destructive",
+        onPress: async () => {
+          setIsLoading(true);
+          try {
+            await deleteComment(postId, commentId);
+          } catch (error: any) {
+            Alert.alert(
+              "오류",
+              error?.message || "댓글 삭제 중 오류가 발생했습니다."
+            );
+          } finally {
+            setIsLoading(false);
+          }
+        },
+      },
+    ]);
+  };
+
   const renderPostCard = ({
     item,
   }: {
@@ -226,13 +251,32 @@ const HomeScreen = () => {
 
       {/* 댓글 목록 */}
       <View style={styles.commentList}>
-        {comments[item.id]?.map((item) => (
-          <View key={item.id} style={styles.commentItem}>
+        {comments[item.id]?.map((comment) => (
+          <View key={comment.id} style={styles.commentItem}>
             <View style={styles.commentContent}>
-              <Text style={styles.commentUserName}>
-                {item.userName || "삭제된 계정"}
-              </Text>
-              <Text style={styles.commentText}>{item.content}</Text>
+              <View style={styles.flexRow}>
+                <Text style={styles.commentUserName}>
+                  {comment.userName || "삭제된 계정"}
+                </Text>
+                <Text style={styles.commentText}>{comment.content}</Text>
+              </View>
+              {/* 내 댓글이면 X 버튼 */}
+              {auth.currentUser?.uid === comment.userId && (
+                <TouchableOpacity
+                  onPress={() => handleDeleteComment(item.id, comment.id)}
+                  style={{ paddingHorizontal: 10 }}
+                >
+                  <Text
+                    style={{
+                      color: colors.red_ff3b30,
+                      fontWeight: "bold",
+                      fontSize: 16,
+                    }}
+                  >
+                    ×
+                  </Text>
+                </TouchableOpacity>
+              )}
             </View>
           </View>
         ))}
@@ -429,17 +473,24 @@ const styles = StyleSheet.create({
     color: colors.gray_808080,
     textAlign: "center",
   },
+  flexRow: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+  },
   commentList: {
     marginTop: 15,
   },
   commentItem: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 6,
+    marginBottom: 10,
   },
   commentContent: {
     flex: 1,
     flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
   commentUserName: {
     fontWeight: "bold",
