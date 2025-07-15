@@ -95,20 +95,19 @@ export const loginUser = async (data: LoginData): Promise<LoginResponse> => {
       data.email,
       data.password
     );
-    const user = userCredential.user;
-
-    if (!user.emailVerified) {
+    // 반드시 currentUser 기준으로 reload
+    await auth.currentUser?.reload();
+    if (!auth.currentUser?.emailVerified) {
       return {
         success: false,
         message:
           "이메일 인증이 완료되지 않았습니다.\n가입하신 이메일을 확인하여 인증을 완료해주세요.",
       };
     }
-
     return {
       success: true,
       message: "로그인 성공",
-      user: user,
+      user: auth.currentUser,
     };
   } catch (error: any) {
     let errorMessage = "로그인 중 오류가 발생했습니다.";
