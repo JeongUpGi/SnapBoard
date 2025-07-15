@@ -35,6 +35,7 @@ import {
 import { updateProfile } from "firebase/auth";
 import * as ImagePicker from "expo-image-picker";
 import * as ImageManipulator from "expo-image-manipulator";
+import { useFocusEffect } from "@react-navigation/native";
 
 const ProfileScreen = () => {
   const [nickname, setNickname] = useState("");
@@ -59,19 +60,20 @@ const ProfileScreen = () => {
     fetchUserProfile();
   }, []);
 
-  // 내 게시글 불러오기
-  useEffect(() => {
-    const fetchMyPosts = async () => {
-      if (!auth.currentUser) return;
-      const q = query(
-        collection(db, "posts"),
-        where("authorId", "==", auth.currentUser.uid)
-      );
-      const snap = await getDocs(q);
-      setMyPosts(snap.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
-    };
-    fetchMyPosts();
-  }, [nickname]);
+  useFocusEffect(
+    React.useCallback(() => {
+      const fetchMyPosts = async () => {
+        if (!auth.currentUser) return;
+        const q = query(
+          collection(db, "posts"),
+          where("authorId", "==", auth.currentUser.uid)
+        );
+        const snap = await getDocs(q);
+        setMyPosts(snap.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
+      };
+      fetchMyPosts();
+    }, [nickname])
+  );
 
   // 게시글 삭제
   const handleDeletePost = (postId: string) => {
